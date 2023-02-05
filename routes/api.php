@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthenticationController;
+use App\Http\Controllers\Members\FamilyHousesController;
+use App\Http\Controllers\Members\FamilyMembersController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -28,4 +30,25 @@ Route::prefix('authentication')->group(function () {
     Route::put('reset-password', [AuthenticationController::class, 'resetPassword']);
 
     Route::get('logout', [AuthenticationController::class, 'logout']);
+});
+
+Route::prefix('family')->group(function () {
+
+    Route::prefix('members')->group(function () {
+
+        Route::post('create', [FamilyMembersController::class, 'create']);
+
+        Route::get('list', [FamilyMembersController::class, 'listMembers']);
+
+        Route::put('update/{id}', [FamilyMembersController::class, 'updateMembers']);
+    });
+
+    Route::prefix("houses")->group(function () {
+
+        Route::post("create", [FamilyHousesController::class, 'createFamilyHouse']);
+
+        Route::get("list", [FamilyHousesController::class, 'listFamilyHouses']);
+
+        Route::put("update/{id}", [FamilyHousesController::class, "updateFamilyHouses"]);
+    });
 });
