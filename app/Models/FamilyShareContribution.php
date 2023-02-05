@@ -10,4 +10,6 @@ class FamilyShareContribution extends Model
     use HasFactory;
 
     protected $guarded = [];
+
+    protected $table = "family_share_contributions";
 }

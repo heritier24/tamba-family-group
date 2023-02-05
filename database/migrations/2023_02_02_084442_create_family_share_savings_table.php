@@ -21,7 +21,20 @@ return new class extends Migration
             $table->integer("number_of_shares"); // number of shares
             $table->integer("total_shares_amount"); // total shares amount to be paid every months = (saving amount * number_of_shares)
             $table->string("status"); // active , inactive
+            $table->unsignedBigInteger("user_id"); // user identifier
             $table->timestamps();
+
+            $table->foreign('share_type_id')->references('id')->on('family_share_types')
+                ->onDelete('restrict')
+                ->onUpdate('cascade');
+
+            $table->foreign('house_member_id')->references('id')->on('family_house_members')
+                ->onDelete('restrict')
+                ->onUpdate('cascade');
+
+            $table->foreign('user_id')->references('id')->on('users')
+                ->onDelete('restrict')
+                ->onUpdate('cascade');
         });
     }
 

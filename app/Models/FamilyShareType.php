@@ -10,4 +10,6 @@ class FamilyShareType extends Model
     use HasFactory;
 
     protected $guarded = [];
+
+    protected $table = "family_share_types";
 }

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string("phonenumber");
             $table->string("marital_status");  // single , married
             $table->integer("national_id")->nullable();
-            $table->string("status"); // active, inactive
+            $table->string("status")->default("active"); // active, inactive
             $table->integer("person_id")->nullable();
             $table->timestamps();
         });

@@ -15,9 +15,10 @@ return new class extends Migration
     {
         Schema::create('family_share_types', function (Blueprint $table) {
             $table->id();
-            $table->string("share_type"); // share , savings , ..... 
+            $table->string("share_type"); // share contribution, savings , ..... 
+            $table->string("year"); // year (2023-2024, 2024-2025)
             $table->string("amount"); // amount per share , for example amount per savings = 5000 
-            $table->string("status"); // active share type, inactive share type
+            $table->string("status")->default("active"); // active share type, inactive share type
             $table->timestamps();
         });
     }

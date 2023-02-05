@@ -10,4 +10,6 @@ class FamilyMembers extends Model
     use HasFactory;
 
     protected $guarded = [];
+
+    protected $table = "family_members";
 }
