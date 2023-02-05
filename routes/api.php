@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthenticationController;
+use App\Http\Controllers\Members\FamilyHouseMembersController;
 use App\Http\Controllers\Members\FamilyHousesController;
 use App\Http\Controllers\Members\FamilyMembersController;
 use Illuminate\Http\Request;
@@ -50,5 +51,12 @@ Route::prefix('family')->group(function () {
         Route::get("list", [FamilyHousesController::class, 'listFamilyHouses']);
 
         Route::put("update/{id}", [FamilyHousesController::class, "updateFamilyHouses"]);
+
+        Route::prefix("members")->group(function () {
+
+            Route::post("create-members", [FamilyHouseMembersController::class, "createFamilyHouseMembers"]);
+
+            Route::get("list-members", [FamilyHouseMembersController::class, "listFamilyHouseMembers"]);
+        });
     });
 });
