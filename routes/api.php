@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\Members\FamilyHouseMembersController;
 use App\Http\Controllers\Members\FamilyHousesController;
 use App\Http\Controllers\Members\FamilyMembersController;
+use App\Http\Controllers\Shares\FamilySharesTypeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -58,5 +59,16 @@ Route::prefix('family')->group(function () {
 
             Route::get("list-members", [FamilyHouseMembersController::class, "listFamilyHouseMembers"]);
         });
+    });
+
+    Route::prefix("shares")->group(function () {
+
+        Route::post("share-type", [FamilySharesTypeController::class, "recordSharesType"]);
+
+        Route::get("list-shares", [FamilySharesTypeController::class, "listShareTypes"]);
+
+        Route::put("update/{id}", [FamilySharesTypeController::class, "updateSharesType"])->whereNumber("id");
+
+        Route::delete("delete-type-share/{id}", [FamilySharesTypeController::class, "deleteShareType"])->whereNumber("id");
     });
 });
