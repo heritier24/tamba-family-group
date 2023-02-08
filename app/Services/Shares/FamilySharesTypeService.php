@@ -47,7 +47,7 @@ class FamilySharesTypeService
      * @param string $amount
      * @return FamilyShareType
      */
-    public function updateSharesType(int $id, string $shareType, string $year, string $amount): FamilyShareType
+    public function updateSharesType(int $id, string $shareType, string $year, string $amount)
     {
         $updateSharetypes = FamilyShareType::where("id", $id)->update([
             "share_type" => $shareType,
