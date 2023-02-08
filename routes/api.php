@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\Members\FamilyHouseMembersController;
 use App\Http\Controllers\Members\FamilyHousesController;
 use App\Http\Controllers\Members\FamilyMembersController;
+use App\Http\Controllers\Shares\FamilySharesContributionsController;
 use App\Http\Controllers\Shares\FamilySharesTypeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -70,5 +71,14 @@ Route::prefix('family')->group(function () {
         Route::put("update/{id}", [FamilySharesTypeController::class, "updateSharesType"])->whereNumber("id");
 
         Route::delete("delete-type-share/{id}", [FamilySharesTypeController::class, "deleteShareType"])->whereNumber("id");
+
+        Route::prefix("contributions")->group(function () {
+
+            Route::post("create", [FamilySharesContributionsController::class, "createFamilySharesContributions"]);
+
+            Route::get("list", [FamilySharesContributionsController::class, "listFamilySharesContributions"]);
+
+            Route::put("update/{id}", [FamilySharesContributionsController::class, "updateFamilySharesContributions"])->whereNumber("id");
+        });
     });
 });
