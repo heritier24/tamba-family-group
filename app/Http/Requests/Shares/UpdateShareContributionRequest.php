@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests\Shares;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\Response;
 
 class UpdateShareContributionRequest extends FormRequest
 {
@@ -29,5 +32,23 @@ class UpdateShareContributionRequest extends FormRequest
             "user_id" => "required|integer",
             "transaction_to" => "required|string",
         ];
+    }
+
+    /**
+     * Handle a failed validation attempt.
+     *
+     * @throws HttpResponseException
+     */
+    protected function failedValidation(Validator $validator): void
+    {
+        if ($validator->fails()) {
+            throw new HttpResponseException(response()
+                ->json(
+                    [
+                        "errors" => $validator->errors()->all()
+                    ],
+                    Response::HTTP_UNPROCESSABLE_ENTITY
+                ));
+        }
     }
 }
