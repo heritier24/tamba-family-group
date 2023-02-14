@@ -64,21 +64,18 @@ Route::prefix('family')->group(function () {
 
     Route::prefix("shares")->group(function () {
 
-        Route::post("share-type", [FamilySharesTypeController::class, "recordSharesType"]);
+        Route::post("", [FamilySharesTypeController::class, "recordSharesType"]);
 
-        Route::get("list-shares", [FamilySharesTypeController::class, "listShareTypes"]);
+        Route::get("", [FamilySharesTypeController::class, "listShareTypes"]);
 
         Route::put("update/{id}", [FamilySharesTypeController::class, "updateSharesType"])->whereNumber("id");
 
-        Route::delete("delete-type-share/{id}", [FamilySharesTypeController::class, "deleteShareType"])->whereNumber("id");
+        Route::delete("delete/{id}", [FamilySharesTypeController::class, "deleteShareType"])->whereNumber("id");
 
-        Route::prefix("contributions")->group(function () {
+        Route::post("contributions/create", [FamilySharesContributionsController::class, "createFamilySharesContributions"]);
 
-            Route::post("create", [FamilySharesContributionsController::class, "createFamilySharesContributions"]);
+        Route::get("contributions/list", [FamilySharesContributionsController::class, "listFamilySharesContributions"]);
 
-            Route::get("list", [FamilySharesContributionsController::class, "listFamilySharesContributions"]);
-
-            Route::put("update/{id}", [FamilySharesContributionsController::class, "updateFamilySharesContributions"])->whereNumber("id");
-        });
+        Route::put("contributions/update/{contributionID}", [FamilySharesContributionsController::class, "updateFamilySharesContributions"])->whereNumber("contributionID");
     });
 });
