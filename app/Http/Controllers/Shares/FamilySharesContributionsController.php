@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Shares;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Shares\CreateShareContributionRequest;
+use App\Http\Requests\Shares\UpdateShareContributionRequest;
 use App\Services\Shares\FamilySharesContributionsService;
 use Illuminate\Http\Request;
 
@@ -25,8 +26,7 @@ class FamilySharesContributionsController extends Controller
                 $request->share_type_id,
                 $request->house_member_id,
                 $request->share_amount,
-                $request->amount_paid,
-                $request->status
+                $request->amount_paid
             );
 
             return response()->json(["family share contribution saved"]);
@@ -54,10 +54,17 @@ class FamilySharesContributionsController extends Controller
         }
     }
 
-    public function updateFamilySharesContributions(int $id)
+    /**
+     * update share contribution send request data to service
+     *
+     * @param UpdateShareContributionRequest $request
+     * @param integer $contributionID
+     * @throws Exception
+     */
+    public function updateFamilySharesContributions(UpdateShareContributionRequest $request, int $contributionID)
     {
         try {
-            $this->service->updateFamilySharesContributions();
+            $this->service->updateFamilySharesContributions($contributionID, $request->amount_paid, $request->status, $request->user_id, $request->transaction_to);
 
             return response()->json(["Family share contribution data updated successfully"]);
         } catch (\Exception $e) {
