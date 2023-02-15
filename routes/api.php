@@ -6,6 +6,7 @@ use App\Http\Controllers\Members\FamilyHousesController;
 use App\Http\Controllers\Members\FamilyMembersController;
 use App\Http\Controllers\Shares\FamilySharesContributionsController;
 use App\Http\Controllers\Shares\FamilySharesTypeController;
+use App\Http\Controllers\Shares\Savings\FamilySharesSavingsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -77,5 +78,13 @@ Route::prefix('family')->group(function () {
         Route::get("contributions/list", [FamilySharesContributionsController::class, "listFamilySharesContributions"]);
 
         Route::put("contributions/update/{contributionID}", [FamilySharesContributionsController::class, "updateFamilySharesContributions"])->whereNumber("contributionID");
+
+        Route::get("savings", [FamilySharesSavingsController::class, "listSavingsShare"]);
+
+        Route::post("savings/create", [FamilySharesSavingsController::class, "recordSavings"]);
+
+        Route::put("savings/update/{savingID}", [FamilySharesSavingsController::class, "updateSavings"])->whereNumber("savingID");
+
+        Route::get("savings-transactions", [FamilySharesSavingsController::class, "savingsTransactions"]);
     });
 });
