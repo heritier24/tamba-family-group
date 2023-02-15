@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger("share_type_id"); // family share type id for savings
             $table->unsignedBigInteger("house_member_id"); // id of member from family house member table
-            $table->string("saving_amount");
+            $table->integer("saving_amount");
             $table->integer("number_of_shares"); // number of shares
             $table->integer("total_shares_amount"); // total shares amount to be paid every months = (saving amount * number_of_shares)
             $table->string("status"); // active , inactive
