@@ -4,12 +4,27 @@ namespace App\Services\Savings;
 
 use App\Models\FamilyShareSavings;
 use Exception;
+use Illuminate\Support\Facades\DB;
 
 class FamilyShareSavingsService
 {
     public function listSavingsShare()
     {
-        $shares = FamilyShareSavings::all(["*"]);
+        $shares = DB::select("SELECT
+                                   family_share_savings.id,
+                                   family_members.names AS familyNames,
+                                   family_share_types.share_type AS savingType,
+                                   family_share_savings.saving_amount AS savingAmount,
+                                   family_share_savings.number_of_shares AS sharesNumber,
+                                   family_share_savings.total_shares_amount AS totalSharesAmount,
+                                   family_share_savings.status AS status,
+                                   users.name AS recordedBy
+                               FROM family_share_savings
+                                   INNER JOIN family_share_types ON family_share_savings.share_type_id = family_share_types.id
+                                   INNER JOIN family_house_members ON family_share_savings.house_member_id = family_house_members.id
+                                   INNER JOIN family_houses ON family_house_members.house_id = family_houses.id
+                                   INNER JOIN family_members ON family_house_members.member_id = family_members.id
+                                   INNER JOIN users ON family_share_savings.user_id = users.id");
 
         return $shares;
     }
