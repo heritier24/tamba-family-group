@@ -79,5 +79,22 @@ class FamilyShareSavingsService
 
     public function savingsTransactions()
     {
+        $transactions = DB::select("SELECT
+                                        family_members.names AS members,
+                                        family_share_types.share_type AS savingType,
+                                        family_share_saving_transactions.amount_tobe_paid AS amountTobePaid,
+                                        family_share_saving_transactions.amount_paid AS transactionAmount,
+                                        family_share_saving_transactions.remaining_amount AS remainingAmount,
+                                        family_share_saving_transactions.status AS status,
+                                        users.name AS recordedBy
+                                    FROM
+                                        family_share_saving_transactions
+                                        INNER JOIN family_share_savings ON family_share_saving_transactions.family_share_saving_id = family_share_savings.id
+                                        INNER JOIN family_share_types ON family_share_savings.share_type_id = family_share_types.id
+                                        INNER JOIN family_house_members ON family_share_savings.house_member_id = family_house_members.id
+                                        INNER JOIN family_members ON family_house_members.member_id = family_members.id
+                                        INNER JOIN users ON family_share_saving_transactions.user_id = users.id");
+
+        return $transactions;
     }
 }
