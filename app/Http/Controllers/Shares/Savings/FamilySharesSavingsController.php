@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Shares\Savings;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Savings\CreateSavingTransactionRequest;
 use App\Http\Requests\Savings\CreateShareSavingsRequest;
 use App\Http\Requests\Savings\UpdateShareSavingsRequest;
 use App\Services\Savings\FamilyShareSavingsService;
@@ -70,12 +71,36 @@ class FamilySharesSavingsController extends Controller
         }
     }
 
-    public function savingsTransactions()
+    public function createSavingsTransactions(CreateSavingTransactionRequest $request)
     {
         try {
-            $this->service->savingsTransactions();
+            $this->service->createSavingsTransactions(
+                $request->family_share_saving_id,
+                $request->monthly_transaction,
+                $request->amount_tobe_paid,
+                $request->amount_paid,
+                $request->remaining_amount,
+                $request->status,
+                $request->user_id,
+                $request->transaction_to
+            );
 
-            return response()->json(["Savings Transactions Saved Successfully"]);
+            return response()->json(["Share Savings transactions Created Successfully"]);
+        } catch (\Exception $e) {
+            [$message, $statusCode, $exceptionCode] = getHttpMessageAndStatusCodeFromException($e);
+
+            return response()->json([
+                "message" => $message,
+            ], $statusCode);
+        }
+    }
+
+    public function listSavingsTransactions()
+    {
+        try {
+            $result = $this->service->listSavingsTransactions();
+
+            return response()->json($result);
         } catch (\Exception $e) {
             [$message, $statusCode, $exceptionCode] = getHttpMessageAndStatusCodeFromException($e);
 
