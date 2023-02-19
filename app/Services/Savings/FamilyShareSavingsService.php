@@ -2,7 +2,10 @@
 
 namespace App\Services\Savings;
 
+use App\Models\Account;
 use App\Models\FamilyShareSavings;
+use App\Models\FamilyShareSavingTransaction;
+use App\Models\GeneralTransactions;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
@@ -77,11 +80,97 @@ class FamilyShareSavingsService
         return $updateSavings;
     }
 
-    public function savingsTransactions()
+    public function createSavingsTransactions(
+        int $familyShareSavingID,
+        string $monthlyandYear,
+        int $amountTobePaid,
+        int $amountPaid,
+        int $remainingAmount,
+        string $status,
+        int $userID,
+        string $transactionTo
+    ) {
+        $createSavingsTransactions = DB::transaction(function () use ($familyShareSavingID, $monthlyandYear, $amountTobePaid, $amountPaid, $remainingAmount, $status, $userID, $transactionTo) {
+            $shareMemberSaving = FamilyShareSavings::where("id", $familyShareSavingID)->first();
+            if (!$shareMemberSaving) {
+                throw new Exception("Family share saving does not exist ! Please record share saving amount ");
+            }
+            if ($shareMemberSaving->total_shares_amount != $amountTobePaid) {
+                throw new Exception("Amount to be paid is not equal to $amountTobePaid it must be $shareMemberSaving->total_shares_amount please record share saving amount to be paid well ");
+            }
+            $remaining = $shareMemberSaving->total_shares_amount - $amountPaid;
+            if ($remaining != $remainingAmount) {
+                throw new Exception("Amount Remining must be $remaining not to be $remainingAmount");
+            }
+            FamilyShareSavingTransaction::create([
+                "family_share_saving_id" => $familyShareSavingID,
+                "monthly_transaction" => $monthlyandYear,
+                "amount_tobe_paid" => $shareMemberSaving->total_shares_amount,
+                "amount_paid" => $amountPaid,
+                "remaining_amount" => $remaining,
+                "status" => $status,
+                "user_id" => $userID
+            ]);
+            $transactionType = $this->findTransactionTypetoCreateTransaction($familyShareSavingID);
+
+            $transactionFrom = $this->getTransactionFrom($familyShareSavingID);
+
+            GeneralTransactions::create([
+                "transaction_date" => now(),
+                "transaction_type" => $transactionType,
+                "transaction_from" => $transactionFrom,
+                "transaction_to" => $transactionTo,
+                "transaction_amount" => $amountPaid,
+                "user_id" => $userID
+            ]);
+            $account = Account::where("account_type", $transactionTo)->first();
+            if (!$account) {
+                Account::create([
+                    "account_type" => $transactionTo,
+                    "account_amount" => $amountPaid,
+                ]);
+            } else {
+                $accountId = $account->id;
+                $amount = $account->account_amount;
+                $accountAmount = $amount + $amountPaid;
+                Account::where("id", $accountId)->update([
+                    "account_amount" => $accountAmount
+                ]);
+            }
+        });
+        return $createSavingsTransactions;
+    }
+
+    private function getTransactionFrom(int $familyShareSavingID)
+    {
+        $memberFrom = DB::selectOne("SELECT family_members.names 
+                                     FROM family_share_savings 
+                                     INNER JOIN family_house_members 
+                                     ON family_share_savings.house_member_id = family_house_members.id 
+                                     INNER JOIN family_members ON family_house_members.member_id = family_members.id 
+                                     WHERE family_share_savings.id = ?", [$familyShareSavingID]);
+        return $memberFrom->names;
+    }
+
+    private function findTransactionTypetoCreateTransaction(int $familyShareSavingID)
+    {
+        $share =  DB::selectOne("SELECT family_share_types.share_type 
+                              FROM family_share_savings 
+                              INNER JOIN family_share_types 
+                              ON family_share_savings.share_type_id = family_share_types.id 
+                              WHERE family_share_savings.id = ?", [$familyShareSavingID]);
+        if (!$share) {
+            throw new Exception("Could not find transaction type for family_share_types");
+        }
+        return $share->share_type;
+    }
+
+    public function listSavingsTransactions()
     {
         $transactions = DB::select("SELECT
                                         family_members.names AS members,
                                         family_share_types.share_type AS savingType,
+                                        family_share_saving_transactions.monthly_transaction AS monthlyandYear,
                                         family_share_saving_transactions.amount_tobe_paid AS amountTobePaid,
                                         family_share_saving_transactions.amount_paid AS transactionAmount,
                                         family_share_saving_transactions.remaining_amount AS remainingAmount,
