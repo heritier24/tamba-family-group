@@ -88,5 +88,7 @@ Route::prefix('family')->group(function () {
         Route::get("savings-transactions", [FamilySharesSavingsController::class, "listSavingsTransactions"]);
 
         Route::post("savings-transactions", [FamilySharesSavingsController::class, "createSavingsTransactions"]);
+
+        Route::put("savings-transactions/{transactionID}", [FamilySharesSavingsController::class, "updateSavingsTransactions"])->whereNumber("transactionID");
     });
 });

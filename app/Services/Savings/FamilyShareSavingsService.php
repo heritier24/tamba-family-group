@@ -141,6 +141,86 @@ class FamilyShareSavingsService
         return $createSavingsTransactions;
     }
 
+    public function updateSavingsTransactions(
+        int $transactionID,
+        string $monthlyandYear,
+        int $amountTobePaid,
+        int $amountPaid,
+        int $remainingAmount,
+        int $newUpdatedAmount,
+        string $transactionTo,
+        int $userID
+    ) {
+        $updateSavingsTransactions = DB::transaction(function () use ($transactionID, $monthlyandYear, $amountTobePaid, $amountPaid, $remainingAmount, $newUpdatedAmount, $transactionTo, $userID) {
+            $transaction = FamilyShareSavingTransaction::where("id", $transactionID)->first();
+            if (!$transaction) {
+                throw new Exception("Could not find transaction family saving with id $transactionID");
+            }
+            $transactionPeriod = $transaction->monthly_transaction;
+            if ($transactionPeriod != $monthlyandYear) {
+                throw new Exception("Monthly and you select is incorrect : it's $transactionPeriod instead of $monthlyandYear");
+            }
+            $tobePaid = $transaction->amount_tobe_paid;
+            if ($tobePaid != $amountTobePaid) {
+                throw new Exception("Amount to be paid is $tobePaid instead of $amountTobePaid");
+            }
+            $paid = $transaction->amount_paid;
+            if ($paid != $amountPaid) {
+                throw new Exception("Amount to be paid is $paid instead of $amountPaid ");
+            }
+            $amountPaidUpdate = $newUpdatedAmount + $amountPaid;
+            $remainingUpdate = $amountTobePaid - $amountPaidUpdate;
+            if ($remainingUpdate != $remainingAmount) {
+                throw new Exception("Amount remaining to pay is $remainingUpdate instead of $remainingAmount");
+            }
+
+            FamilyShareSavingTransaction::where("id", $transactionID)->update([
+                "amount_paid" => $amountPaidUpdate,
+                "remaining_amount" => $remainingUpdate
+            ]);
+            $transactionFrom = $this->getTransactionFromToUpdateSavingstransaction($transactionID);
+            GeneralTransactions::create([
+                "transaction_date" => now(),
+                "transaction_type" => "Savings",
+                "transaction_from" => $transactionFrom,
+                "transaction_to" => $transactionTo,
+                "transaction_amount" => $newUpdatedAmount,
+                "user_id" => $userID
+            ]);
+
+            $account = Account::where("account_type", $transactionTo)->first();
+            if (!$account) {
+                Account::create([
+                    "account_type" => $transactionTo,
+                    "account_amount" => $newUpdatedAmount,
+                ]);
+            } else {
+                $accountId = $account->id;
+                $amount = $account->account_amount;
+                $accountAmount = $amount + $newUpdatedAmount;
+                Account::where("id", $accountId)->update([
+                    "account_amount" => $accountAmount
+                ]);
+            }
+        });
+
+        return $updateSavingsTransactions;
+    }
+
+    private function getTransactionFromToUpdateSavingstransaction($transactionID)
+    {
+        $transactionFrom = DB::selectOne("SELECT family_members.names 
+                                          FROM family_share_saving_transactions 
+                                          INNER JOIN family_share_savings 
+                                          ON family_share_saving_transactions.family_share_saving_id = family_share_savings.id
+                                          INNER JOIN family_house_members 
+                                          ON family_share_savings.house_member_id = family_house_members.id 
+                                          INNER JOIN family_members 
+                                          ON family_house_members.member_id = family_members.id 
+                                          WHERE family_share_saving_transactions.id = ?", [$transactionID]);
+        return $transactionFrom->names;
+    }
+
     private function getTransactionFrom(int $familyShareSavingID)
     {
         $memberFrom = DB::selectOne("SELECT family_members.names 
